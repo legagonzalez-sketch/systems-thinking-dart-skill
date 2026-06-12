@@ -43,7 +43,7 @@ Activate when the request has meaningful uncertainty, more than one plausible ca
 ## Classification rubric
 
 | System | Cause and effect | Evidence state | Best action | Wrong move |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | Clear | Obvious, direct, repeatable | Known facts, known procedure | Sense, categorize, respond with checklist | Over-analyze or over-engineer |
 | Complicated | Knowable through expertise or analysis | Data exists or can be gathered | Analyze, compare options, consult expertise | Guessing or treating expert disagreement as chaos |
 | Complex | Non-linear, emergent, many interactions | Patterns appear only after probing | Probe, measure, learn, adapt | Promising deterministic outcomes |

@@ -5,7 +5,7 @@
 Security reports are accepted for the current major version.
 
 | Version | Supported |
-|---|---|
+| --- | --- |
 | 1.x | Yes |
 
 ## Reporting a vulnerability

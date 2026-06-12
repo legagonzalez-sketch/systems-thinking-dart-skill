@@ -112,7 +112,7 @@ flowchart LR
 ## Supported agents
 
 | Agent or model family | Adapter | Status |
-|---|---|---|
+| --- | --- | --- |
 | Claude Sonnet / Opus / Haiku | `systems-thinking-dart/adapters/claude.md` | 🧪 experimental |
 | GPT-4o / GPT-5 | `systems-thinking-dart/adapters/gpt.md` | 🧪 experimental |
 | DeepSeek V3 / V4 | `systems-thinking-dart/adapters/deepseek.md` | 🧪 experimental |
