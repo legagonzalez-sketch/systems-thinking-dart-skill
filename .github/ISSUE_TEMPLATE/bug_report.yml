@@ -1,0 +1,51 @@
+name: Bug report
+description: Report incorrect activation, classification, routing, or documentation.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What went wrong?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Activation criteria
+        - DART classification
+        - Response template
+        - Adapter
+        - Eval suite
+        - Documentation
+        - GitHub workflow
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Include the prompt, expected behavior, and actual behavior.
+      placeholder: |
+        Prompt:
+        Expected:
+        Actual:
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Agent, model, provider, adapter, and version.
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+    validations:
+      required: false

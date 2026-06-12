@@ -1,0 +1,170 @@
+name: Eval
+
+on:
+  pull_request:
+    paths:
+      - "systems-thinking-dart/**"
+      - "adapters/**"
+      - ".github/workflows/eval.yml"
+  workflow_dispatch:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      MODEL_PROVIDER: ${{ secrets.MODEL_PROVIDER }}
+      MODEL_NAME: ${{ secrets.MODEL_NAME }}
+      API_KEY: ${{ secrets.API_KEY }}
+      MODEL_BASE_URL: ${{ secrets.MODEL_BASE_URL }}
+      MIN_ACCURACY: "0.80"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install requests
+
+      - name: Run DART eval
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          import textwrap
+          import urllib.parse
+
+          import requests
+
+          cases_path = "systems-thinking-dart/tests/eval-cases.jsonl"
+          skill_path = "systems-thinking-dart/SKILL.md"
+          min_accuracy = float(os.getenv("MIN_ACCURACY", "0.80"))
+          provider = os.getenv("MODEL_PROVIDER", "").strip().lower()
+          model = os.getenv("MODEL_NAME", "").strip()
+          api_key = os.getenv("API_KEY", "").strip()
+          base_url = os.getenv("MODEL_BASE_URL", "").strip()
+
+          with open(cases_path, "r", encoding="utf-8") as f:
+              cases = [json.loads(line) for line in f if line.strip()]
+
+          if len(cases) > 20:
+              raise SystemExit("Eval suite must stay at 20 cases or fewer for fast PR checks.")
+
+          with open(skill_path, "r", encoding="utf-8") as f:
+              skill = f.read()
+
+          def offline_eval():
+              missing = [c for c in cases if "expected_system" not in c or "expected_skill_active" not in c]
+              if missing:
+                  raise SystemExit("Eval cases missing required fields.")
+              inactive = [c for c in cases if not c["expected_skill_active"]]
+              if len(inactive) < 3:
+                  raise SystemExit("Eval suite must include at least 3 trap cases.")
+              print(f"Provider secrets not configured; metadata-only eval passed for {len(cases)} cases.")
+
+          def chat_openai_compatible(prompt):
+              url = base_url or "https://api.openai.com/v1/chat/completions"
+              headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+              payload = {
+                  "model": model,
+                  "temperature": 0,
+                  "messages": [
+                      {"role": "system", "content": "You are evaluating an agent skill. Return JSON only."},
+                      {"role": "user", "content": prompt},
+                  ],
+              }
+              response = requests.post(url, headers=headers, json=payload, timeout=20)
+              response.raise_for_status()
+              return response.json()["choices"][0]["message"]["content"]
+
+          def chat_anthropic(prompt):
+              url = base_url or "https://api.anthropic.com/v1/messages"
+              headers = {
+                  "x-api-key": api_key,
+                  "anthropic-version": "2023-06-01",
+                  "content-type": "application/json",
+              }
+              payload = {
+                  "model": model,
+                  "max_tokens": 512,
+                  "temperature": 0,
+                  "system": "You are evaluating an agent skill. Return JSON only.",
+                  "messages": [{"role": "user", "content": prompt}],
+              }
+              response = requests.post(url, headers=headers, json=payload, timeout=20)
+              response.raise_for_status()
+              return response.json()["content"][0]["text"]
+
+          def ask_model(case):
+              prompt = f"""
+              Skill:
+              {skill[:8000]}
+
+              Eval input:
+              {case["input"]}
+
+              Return one JSON object with:
+              {{
+                "skill_active": true|false,
+                "system": "clear|complicated|complex|chaotic",
+                "has_dart_contract": true|false
+              }}
+              If skill_active is false, has_dart_contract must be false.
+              """
+              if provider in {"openai", "openai-compatible", "gpt", "deepseek", "gemini"}:
+                  raw = chat_openai_compatible(prompt)
+              elif provider in {"anthropic", "claude"}:
+                  raw = chat_anthropic(prompt)
+              else:
+                  raise SystemExit(f"Unsupported MODEL_PROVIDER: {provider}")
+              match = re.search(r"\{.*\}", raw, re.S)
+              if not match:
+                  raise AssertionError(f"No JSON object in model output: {raw}")
+              return json.loads(match.group(0))
+
+          if not (provider and model and api_key):
+              offline_eval()
+              sys.exit(0)
+
+          correct = 0
+          contract_ok = 0
+          trap_ok = 0
+          trap_total = 0
+
+          for case in cases:
+              got = ask_model(case)
+              expected_active = bool(case["expected_skill_active"])
+              expected_system = case["expected_system"]
+
+              active_ok = bool(got["skill_active"]) == expected_active
+              system_ok = (not expected_active) or got["system"] == expected_system
+              if active_ok and system_ok:
+                  correct += 1
+
+              if expected_active:
+                  contract_ok += bool(got["has_dart_contract"])
+              else:
+                  trap_total += 1
+                  trap_ok += not bool(got["skill_active"])
+
+          accuracy = correct / len(cases)
+          active_cases = sum(1 for c in cases if c["expected_skill_active"])
+          contract_rate = contract_ok / max(active_cases, 1)
+
+          print(f"accuracy={accuracy:.2%}")
+          print(f"output_contract={contract_rate:.2%}")
+          print(f"trap_cases={trap_ok}/{trap_total}")
+
+          if accuracy < min_accuracy:
+              raise SystemExit(f"Accuracy below threshold: {accuracy:.2%} < {min_accuracy:.0%}")
+          if trap_ok != trap_total:
+              raise SystemExit("Self-deactivation failed on one or more trap cases.")
+          if contract_rate < min_accuracy:
+              raise SystemExit("Output contract adherence below threshold.")
+          PY

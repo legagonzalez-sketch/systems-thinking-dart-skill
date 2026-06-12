@@ -1,0 +1,4 @@
+interface:
+  display_name: "Systems Thinking DART"
+  short_description: "Classify problems and choose the right response mode"
+  default_prompt: "Use $systems-thinking-dart to classify this ambiguous decision and recommend the right response mode."

@@ -1,0 +1,73 @@
+name: New adapter
+description: Request or propose support for a new model adapter.
+title: "adapter: add support for "
+labels:
+  - adapter
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      placeholder: "Llama 4 405B"
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Provider
+      placeholder: "Meta, Mistral, OpenRouter, local runtime, etc."
+    validations:
+      required: true
+  - type: input
+    id: size
+    attributes:
+      label: Model size
+      placeholder: "405B, 70B, 8B, unknown"
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Context window
+      placeholder: "128k tokens"
+    validations:
+      required: true
+  - type: dropdown
+    id: thinking
+    attributes:
+      label: Supports native thinking?
+      options:
+        - "Yes"
+        - "No"
+        - "Unknown"
+    validations:
+      required: true
+  - type: dropdown
+    id: tools
+    attributes:
+      label: Supports tool use?
+      options:
+        - "Yes"
+        - "No"
+        - "Unknown"
+    validations:
+      required: true
+  - type: input
+    id: pr
+    attributes:
+      label: Adapter PR link
+      placeholder: "https://github.com/.../pull/123"
+    validations:
+      required: false
+  - type: textarea
+    id: evals
+    attributes:
+      label: Eval results
+      description: Include classification accuracy, output-contract adherence, and trap-case behavior.
+      placeholder: |
+        Accuracy:
+        Output contract adherence:
+        Trap case pass rate:
+        Notes:
+    validations:
+      required: false
