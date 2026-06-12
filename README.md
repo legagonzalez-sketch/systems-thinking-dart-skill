@@ -25,7 +25,7 @@ This repo packages DART plus an adapted Cynefin classification as a meta-reasoni
 - **Recognize:** detect known patterns, including Cobra Effect incentives and delayed feedback loops.
 - **Test:** choose the smallest useful experiment, or stabilize first in chaos.
 
-Cynefin, developed by Dave Snowden, is a decision framework for matching action to context. Two short anchors from the original framing are useful here: "probe-sense-respond" for complex domains and "act-sense-respond" for chaotic domains.
+Cynefin, developed by Dave Snowden, and D.A.R.T, developed by Sandeep Swadia, are combined here as a meta-reasoning layer for matching action to context. Two short anchors from the original Cynefin framing are useful here: "probe-sense-respond" for complex domains and "act-sense-respond" for chaotic domains.
 
 ## Quickstart
 
@@ -178,4 +178,4 @@ MIT. See [LICENSE](LICENSE).
 
 ## Credits
 
-Based on Dave Snowden's Cynefin framework and a DART adaptation for agent routing: Deconstruct, Analyze, Recognize, Test.
+Based on Dave Snowden's Cynefin framework and Sandeep Swadia's D.A.R.T framework for agent routing: Deconstruct, Analyze, Recognize, Test.

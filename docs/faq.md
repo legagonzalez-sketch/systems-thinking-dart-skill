@@ -6,7 +6,7 @@ Cynefin is a decision framework developed by Dave Snowden. It helps classify sit
 
 ## What is DART?
 
-DART is the operational loop used by this skill: Deconstruct, Analyze, Recognize, Test. It turns classification into an answer route.
+D.A.R.T is a framework developed by Sandeep Swadia. This skill uses it as an operational loop: Deconstruct, Analyze, Recognize, Test. It turns classification into an answer route.
 
 ## Does this replace reasoning models?
 
